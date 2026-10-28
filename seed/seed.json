@@ -1,234 +1,636 @@
 {
-	"$schema": "https://emdashcms.com/seed.schema.json",
-	"version": "1",
-	"meta": {
-		"name": "Starter",
-		"description": "A minimal EmDash starter with posts and pages",
-		"author": "EmDash"
-	},
-	"settings": {
-		"title": "My Site",
-		"tagline": "Built with EmDash"
-	},
-	"collections": [
-		{
-			"slug": "posts",
-			"label": "Posts",
-			"labelSingular": "Post",
-			"urlPattern": "/posts/{slug}",
-			"supports": ["drafts", "revisions", "preview", "scheduling", "search", "seo"],
-			"fields": [
-				{
-					"slug": "title",
-					"label": "Title",
-					"type": "string",
-					"required": true,
-					"searchable": true
-				},
-				{
-					"slug": "featured_image",
-					"label": "Featured Image",
-					"type": "image"
-				},
-				{
-					"slug": "content",
-					"label": "Content",
-					"type": "portableText",
-					"searchable": true
-				},
-				{
-					"slug": "excerpt",
-					"label": "Excerpt",
-					"type": "text"
-				}
-			]
-		},
-		{
-			"slug": "pages",
+  "$schema": "https://emdashcms.com/seed.schema.json",
+  "version": "1",
+  "meta": {
+    "name": "LUMI CASA Smart Home",
+    "description": "Content model and sample content for the LUMI CASA Smart Home website",
+    "author": "LUMI CASA"
+  },
+  "settings": {
+    "title": "LUMI CASA",
+    "tagline": "Smart Home • Security • Automation",
+    "timezone": "Asia/Ho_Chi_Minh",
+    "dateFormat": "dd/MM/yyyy"
+  },
+  "collections": [
+    {
+      "slug": "hero_ctas",
+      "label": "Hero & CTA",
+      "labelSingular": "Hero & CTA",
+      "supports": ["drafts", "revisions"],
+      "fields": [
+        {
+          "slug": "title",
+          "label": "Title",
+          "type": "string",
+          "required": true
+        },
+        {
+          "slug": "badge",
+          "label": "Badge",
+          "type": "string"
+        },
+        {
+          "slug": "description",
+          "label": "Description",
+          "type": "text"
+        },
+        {
+          "slug": "cta_buttons",
+          "label": "CTA Buttons",
+          "type": "repeater",
+          "validation": {
+            "subFields": [
+              {
+                "slug": "label_template",
+                "label": "Label Template",
+                "type": "string",
+                "required": true
+              },
+              {
+                "slug": "url",
+                "label": "URL",
+                "type": "url",
+                "required": true
+              },
+              {
+                "slug": "variant",
+                "label": "Variant",
+                "type": "select",
+                "validation": {
+                  "options": ["primary", "secondary"]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "slug": "image",
+          "label": "Image",
+          "type": "image",
+          "required": true
+        },
+        {
+          "slug": "stats",
+          "label": "Stats",
+          "type": "repeater",
+          "validation": {
+            "subFields": [
+              {
+                "slug": "value_template",
+                "label": "Value Template",
+                "type": "string",
+                "required": true
+              },
+              {
+                "slug": "label",
+                "label": "Label",
+                "type": "string",
+                "required": true
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "slug": "products",
+      "label": "Products",
+      "labelSingular": "Product",
+      "supports": ["drafts", "revisions"],
+      "fields": [
+        {
+          "slug": "title",
+          "label": "Title",
+          "type": "string",
+          "required": true
+        },
+        {
+          "slug": "description",
+          "label": "Description",
+          "type": "text",
+          "required": true
+        },
+        {
+          "slug": "price",
+          "label": "Price (VND)",
+          "type": "integer",
+          "required": true
+        },
+        {
+          "slug": "image",
+          "label": "Image",
+          "type": "image",
+          "required": true
+        },
+        {
+          "slug": "sort_order",
+          "label": "Sort Order",
+          "type": "integer",
+          "required": true
+        }
+      ]
+    },
+    {
+      "slug": "services",
+      "label": "Services",
+      "labelSingular": "Service",
+      "supports": ["drafts", "revisions"],
+      "fields": [
+        {
+          "slug": "title",
+          "label": "Title",
+          "type": "string",
+          "required": true
+        },
+        {
+          "slug": "description",
+          "label": "Description",
+          "type": "text",
+          "required": true
+        },
+        {
+          "slug": "image",
+          "label": "Image",
+          "type": "image",
+          "required": true
+        },
+        {
+          "slug": "features",
+          "label": "Features",
+          "type": "repeater",
+          "validation": {
+            "subFields": [
+              {
+                "slug": "text",
+                "label": "Text",
+                "type": "string",
+                "required": true
+              }
+            ]
+          }
+        },
+        {
+          "slug": "sort_order",
+          "label": "Sort Order",
+          "type": "integer",
+          "required": true
+        }
+      ]
+    },
+    {
+      "slug": "pages",
 			"label": "Pages",
 			"labelSingular": "Page",
-			"urlPattern": "/{slug}",
-			"supports": ["drafts", "revisions", "preview", "search", "seo"],
-			"fields": [
-				{
-					"slug": "title",
-					"label": "Title",
-					"type": "string",
-					"required": true,
-					"searchable": true
-				},
-				{
-					"slug": "content",
-					"label": "Content",
-					"type": "portableText",
-					"searchable": true
-				}
-			]
-		}
-	],
-	"taxonomies": [
-		{
-			"name": "category",
-			"label": "Categories",
-			"labelSingular": "Category",
-			"hierarchical": true,
-			"collections": ["posts"],
-			"terms": [
-				{
-					"slug": "general",
-					"label": "General"
-				},
-				{
-					"slug": "updates",
-					"label": "Updates"
-				}
-			]
-		},
-		{
-			"name": "tag",
-			"label": "Tags",
-			"labelSingular": "Tag",
-			"hierarchical": false,
-			"collections": ["posts"],
-			"terms": [
-				{
-					"slug": "starter",
-					"label": "Starter"
-				},
-				{
-					"slug": "example",
-					"label": "Example"
-				}
-			]
-		}
-	],
-	"menus": [
-		{
-			"name": "primary",
-			"label": "Primary Navigation",
-			"items": [
-				{
-					"type": "custom",
-					"label": "Home",
-					"url": "/"
-				},
-				{
-					"type": "custom",
-					"label": "Posts",
-					"url": "/posts"
-				},
-				{
-					"type": "custom",
-					"label": "About",
-					"url": "/about"
-				}
-			]
-		}
-	],
-	"widgetAreas": [
-		{
-			"name": "sidebar",
-			"label": "Sidebar",
-			"description": "Sidebar widget area",
-			"widgets": [
-				{
-					"type": "component",
-					"componentId": "core:search",
-					"title": "Search"
-				},
-				{
-					"type": "component",
-					"componentId": "core:categories",
-					"title": "Categories"
-				},
-				{
-					"type": "component",
-					"componentId": "core:recent-posts",
-					"title": "Recent Posts",
-					"props": {
-						"count": 5
-					}
-				}
-			]
-		}
-	],
-	"content": {
-		"pages": [
-			{
-				"id": "about",
-				"slug": "about",
-				"status": "published",
-				"data": {
-					"title": "About",
-					"content": [
-						{
-							"_type": "block",
-							"style": "normal",
-							"children": [
-								{
-									"_type": "span",
-									"text": "This is the about page. Edit it in the admin panel or replace this template with your own design.",
-									"_key": "k1"
-								}
-							],
-							"_key": "k0"
-						}
-					]
-				}
-			}
-		],
-		"posts": [
-			{
-				"id": "post-1",
-				"slug": "welcome",
-				"status": "published",
-				"data": {
-					"title": "Welcome",
-					"excerpt": "Your first post. Replace this with your own content.",
-					"content": [
-						{
-							"_type": "block",
-							"style": "normal",
-							"children": [
-								{
-									"_type": "span",
-									"text": "This is a starter post. The templates in this project show the basic patterns for querying and rendering EmDash content. Replace them with your own design.",
-									"_key": "k1"
-								}
-							],
-							"_key": "k0"
-						},
-						{
-							"_type": "block",
-							"style": "h2",
-							"children": [
-								{
-									"_type": "span",
-									"text": "What to do next",
-									"_key": "k3"
-								}
-							],
-							"_key": "k2"
-						},
-						{
-							"_type": "block",
-							"style": "normal",
-							"children": [
-								{
-									"_type": "span",
-									"text": "Open the admin panel to add content, or edit the Astro pages in src/pages to change how content is displayed.",
-									"_key": "k5"
-								}
-							],
-							"_key": "k4"
-						}
-					]
-				},
-				"taxonomies": {
-					"category": ["general"],
-					"tag": ["starter", "example"]
-				}
-			}
-		]
-	}
+      "urlPattern": "/{slug}",
+      "supports": ["drafts", "revisions", "preview", "seo"],
+      "fields": [
+        {
+          "slug": "title",
+          "label": "Title",
+          "type": "string",
+          "required": true
+        },
+        {
+          "slug": "badge_template",
+          "label": "Badge Template",
+          "type": "string"
+        },
+        {
+          "slug": "description",
+          "label": "Description",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "slug": "contact_info",
+      "label": "Contact Information",
+      "labelSingular": "Contact Information",
+      "supports": ["drafts", "revisions"],
+      "fields": [
+        {
+          "slug": "title",
+          "label": "Title",
+          "type": "string",
+          "required": true
+        },
+        {
+          "slug": "badge",
+          "label": "Badge",
+          "type": "string"
+        },
+        {
+          "slug": "description",
+          "label": "Description",
+          "type": "text"
+        },
+        {
+          "slug": "address",
+          "label": "Address",
+          "type": "text",
+          "required": true
+        },
+        {
+          "slug": "hotline",
+          "label": "Hotline",
+          "type": "string",
+          "required": true
+        },
+        {
+          "slug": "email",
+          "label": "Email",
+          "type": "string",
+          "required": true
+        },
+        {
+          "slug": "working_hours",
+          "label": "Working Hours",
+          "type": "string",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "taxonomies": [
+    {
+      "name": "product_category",
+      "label": "Product Categories",
+      "labelSingular": "Product Category",
+      "hierarchical": true,
+      "collections": ["products"],
+      "terms": [
+        {
+          "slug": "trung-tam",
+          "label": "Trung tâm điều khiển"
+        },
+        {
+          "slug": "dieu-khien",
+          "label": "Điều khiển / công tắc"
+        },
+        {
+          "slug": "an-ninh",
+          "label": "An ninh"
+        },
+        {
+          "slug": "cam-bien",
+          "label": "Cảm biến / môi trường"
+        }
+      ]
+    }
+  ],
+  "menus": [
+    {
+      "name": "primary",
+      "label": "Primary Navigation",
+      "items": [
+        {
+          "type": "custom",
+          "label": "Trang chủ",
+          "url": "/"
+        },
+        {
+          "type": "custom",
+          "label": "Sản phẩm",
+          "url": "/products"
+        },
+        {
+          "type": "custom",
+          "label": "Dịch vụ",
+          "url": "/services"
+        },
+        {
+          "type": "custom",
+          "label": "Liên hệ",
+          "url": "/contact"
+        }
+      ]
+    }
+  ],
+  "content": {
+    "hero_ctas": [
+      {
+        "id": "homepage",
+        "slug": "homepage",
+        "status": "published",
+        "data": {
+          "title": "Ngôi nhà hiểu bạn trước cả khi bạn lên tiếng.",
+          "badge": "Smart Home • Sống thông minh hơn",
+          "description": "LUMI CASA cung cấp hệ sinh thái nhà thông minh tinh gọn: điều khiển ánh sáng, an ninh, chất lượng không khí và các kịch bản tự động theo thói quen gia đình.",
+          "cta_buttons": [
+            {
+              "label_template": "Xem {{countProduct}} sản phẩm",
+              "url": "/products",
+              "variant": "primary"
+            },
+            {
+              "label_template": "Khám phá dịch vụ",
+              "url": "/services",
+              "variant": "secondary"
+            }
+          ],
+          "image": {
+            "$media": {
+              "url": "https://images.pexels.com/photos/28549934/pexels-photo-28549934.jpeg?auto=compress&cs=tinysrgb&w=1600",
+              "alt": "Minh họa hệ sinh thái nhà thông minh LUMI CASA",
+              "filename": "lumi-casa-smart-home-hero.jpg"
+            }
+          },
+          "stats": [
+            {
+              "value_template": "{{countProduct}}",
+              "label": "Sản phẩm chủ lực"
+            },
+            {
+              "value_template": "{{countService}}",
+              "label": "Dịch vụ triển khai"
+            },
+            {
+              "value_template": "24/7",
+              "label": "Giám sát hệ thống"
+            }
+          ]
+        }
+      }
+    ],
+    "products": [
+      {
+        "id": "lumi-hub-one",
+        "slug": "lumi-hub-one",
+        "status": "published",
+        "data": {
+          "title": "Lumi Hub One",
+          "description": "Trung tâm kết nối toàn bộ thiết bị, hỗ trợ kịch bản “Về nhà”, “Đi ngủ”, “Ra ngoài” và quản lý từ điện thoại.",
+          "price": 2490000,
+          "image": {
+            "$media": {
+              "url": "https://images.pexels.com/photos/30170004/pexels-photo-30170004.jpeg?auto=compress&cs=tinysrgb&w=1200",
+              "alt": "Lumi Hub One",
+              "filename": "lumi-hub-one.jpg"
+            }
+          },
+          "sort_order": 1
+        },
+        "taxonomies": {
+          "product_category": ["trung-tam"]
+        }
+      },
+      {
+        "id": "lumi-touch-s",
+        "slug": "lumi-touch-s",
+        "status": "published",
+        "data": {
+          "title": "Lumi Touch S",
+          "description": "Công tắc cảm ứng 3 nút, mặt kính chống bám vân tay, có thể gán cảnh chiếu sáng và điều khiển từ xa.",
+          "price": 1290000,
+          "image": {
+            "$media": {
+              "url": "https://images.pexels.com/photos/22610370/pexels-photo-22610370.jpeg?auto=compress&cs=tinysrgb&w=1200",
+              "alt": "Lumi Touch S",
+              "filename": "lumi-touch-s.jpg"
+            }
+          },
+          "sort_order": 2
+        },
+        "taxonomies": {
+          "product_category": ["dieu-khien"]
+        }
+      },
+      {
+        "id": "lumi-guard-cam",
+        "slug": "lumi-guard-cam",
+        "status": "published",
+        "data": {
+          "title": "Lumi Guard Cam",
+          "description": "Camera trong nhà độ phân giải cao, vùng cảnh báo tùy chỉnh, chế độ riêng tư và lưu lịch sử sự kiện.",
+          "price": 1890000,
+          "image": {
+            "$media": {
+              "url": "https://images.pexels.com/photos/24347621/pexels-photo-24347621.jpeg?auto=compress&cs=tinysrgb&w=1200",
+              "alt": "Lumi Guard Cam",
+              "filename": "lumi-guard-cam.jpg"
+            }
+          },
+          "sort_order": 3
+        },
+        "taxonomies": {
+          "product_category": ["an-ninh"]
+        }
+      },
+      {
+        "id": "lumi-air-sense",
+        "slug": "lumi-air-sense",
+        "status": "published",
+        "data": {
+          "title": "Lumi Air Sense",
+          "description": "Cảm biến môi trường theo dõi nhiệt độ, độ ẩm, chất lượng không khí và kích hoạt máy lọc khi vượt ngưỡng.",
+          "price": 990000,
+          "image": {
+            "$media": {
+              "url": "https://images.pexels.com/photos/27662879/pexels-photo-27662879.jpeg?auto=compress&cs=tinysrgb&w=1200",
+              "alt": "Lumi Air Sense",
+              "filename": "lumi-air-sense.jpg"
+            }
+          },
+          "sort_order": 4
+        },
+        "taxonomies": {
+          "product_category": ["cam-bien"]
+        }
+      }
+    ],
+    "services": [
+      {
+        "id": "khao-sat-tu-van",
+        "slug": "khao-sat-tu-van",
+        "status": "published",
+        "data": {
+          "title": "Khảo sát & tư vấn",
+          "description": "Khảo sát mặt bằng, thói quen sinh hoạt và ngân sách để xác định phạm vi tự động hóa phù hợp.",
+          "image": {
+            "$media": {
+              "url": "https://images.pexels.com/photos/28618498/pexels-photo-28618498.jpeg?auto=compress&cs=tinysrgb&w=1000",
+              "alt": "Khảo sát và tư vấn giải pháp nhà thông minh",
+              "filename": "khao-sat-tu-van.jpg"
+            }
+          },
+          "features": [
+            { "text": "Khảo sát hiện trạng" },
+            { "text": "Lập sơ đồ nhu cầu" },
+            { "text": "Dự toán sơ bộ" }
+          ],
+          "sort_order": 1
+        }
+      },
+      {
+        "id": "thiet-ke-kich-ban-smart-home",
+        "slug": "thiet-ke-kich-ban-smart-home",
+        "status": "published",
+        "data": {
+          "title": "Thiết kế kịch bản Smart Home",
+          "description": "Xây dựng các kịch bản theo thời gian, cảm biến, trạng thái phòng và thói quen gia đình.",
+          "image": {
+            "$media": {
+              "url": "https://images.pexels.com/photos/18136105/pexels-photo-18136105.jpeg?auto=compress&cs=tinysrgb&w=1000",
+              "alt": "Thiết kế kịch bản và hệ sinh thái Smart Home",
+              "filename": "thiet-ke-kich-ban-smart-home.jpg"
+            }
+          },
+          "features": [
+            { "text": "Kịch bản ánh sáng" },
+            { "text": "Kịch bản an ninh" },
+            { "text": "Kịch bản tiết kiệm điện" }
+          ],
+          "sort_order": 2
+        }
+      },
+      {
+        "id": "lap-dat-thiet-bi",
+        "slug": "lap-dat-thiet-bi",
+        "status": "published",
+        "data": {
+          "title": "Lắp đặt thiết bị",
+          "description": "Triển khai thiết bị, cân chỉnh vị trí và tối ưu kết nối trong quá trình thi công.",
+          "image": {
+            "$media": {
+              "url": "https://images.pexels.com/photos/17018384/pexels-photo-17018384.jpeg?auto=compress&cs=tinysrgb&w=1000",
+              "alt": "Cấu hình và lắp đặt thiết bị nhà thông minh",
+              "filename": "lap-dat-thiet-bi.jpg"
+            }
+          },
+          "features": [
+            { "text": "Thi công gọn" },
+            { "text": "Cấu hình tại chỗ" },
+            { "text": "Bàn giao từng khu vực" }
+          ],
+          "sort_order": 3
+        }
+      },
+      {
+        "id": "tich-hop-an-ninh",
+        "slug": "tich-hop-an-ninh",
+        "status": "published",
+        "data": {
+          "title": "Tích hợp an ninh",
+          "description": "Kết nối camera, cảm biến cửa, cảnh báo chuyển động và chế độ vắng nhà.",
+          "image": {
+            "$media": {
+              "url": "https://images.pexels.com/photos/26597080/pexels-photo-26597080.jpeg?auto=compress&cs=tinysrgb&w=1000",
+              "alt": "Tích hợp camera và an ninh thông minh",
+              "filename": "tich-hop-an-ninh.jpg"
+            }
+          },
+          "features": [
+            { "text": "Cảnh báo tức thời" },
+            { "text": "Phân vùng giám sát" },
+            { "text": "Nhật ký sự kiện" }
+          ],
+          "sort_order": 4
+        }
+      },
+      {
+        "id": "bao-tri-nang-cap",
+        "slug": "bao-tri-nang-cap",
+        "status": "published",
+        "data": {
+          "title": "Bảo trì & nâng cấp",
+          "description": "Kiểm tra định kỳ, cập nhật cấu hình và mở rộng thiết bị khi nhu cầu thay đổi.",
+          "image": {
+            "$media": {
+              "url": "https://images.pexels.com/photos/22307516/pexels-photo-22307516.jpeg?auto=compress&cs=tinysrgb&w=1000",
+              "alt": "Bảo trì và nâng cấp hệ thống Smart Home",
+              "filename": "bao-tri-nang-cap.jpg"
+            }
+          },
+          "features": [
+            { "text": "Kiểm tra hệ thống" },
+            { "text": "Tối ưu kịch bản" },
+            { "text": "Mở rộng thiết bị" }
+          ],
+          "sort_order": 5
+        }
+      },
+      {
+        "id": "ho-tro-tu-xa",
+        "slug": "ho-tro-tu-xa",
+        "status": "published",
+        "data": {
+          "title": "Hỗ trợ từ xa",
+          "description": "Hướng dẫn sử dụng, xử lý cấu hình và hỗ trợ các vấn đề phát sinh trong vận hành.",
+          "image": {
+            "$media": {
+              "url": "https://images.pexels.com/photos/8566440/pexels-photo-8566440.jpeg?auto=compress&cs=tinysrgb&w=1000",
+              "alt": "Hỗ trợ và điều khiển Smart Home từ xa",
+              "filename": "ho-tro-tu-xa.jpg"
+            }
+          },
+          "features": [
+            { "text": "Hỗ trợ 7 ngày/tuần" },
+            { "text": "Hướng dẫn người dùng" },
+            { "text": "Khôi phục cấu hình" }
+          ],
+          "sort_order": 6
+        }
+      }
+    ],
+    "pages": [
+      {
+        "id": "home",
+        "slug": "home",
+        "status": "published",
+        "data": {
+          "title": "Thiết bị gọn, trải nghiệm liền mạch.",
+          "badge_template": "Sản phẩm nổi bật",
+          "description": "Mỗi thiết bị được thiết kế để hoạt động độc lập nhưng phát huy tốt nhất khi kết nối thành một hệ sinh thái thống nhất."
+        }
+      },
+      {
+        "id": "products",
+        "slug": "products",
+        "status": "published",
+        "data": {
+          "title": "Thiết bị Smart Home cho từng nhu cầu.",
+          "badge_template": "{{countProduct}} sản phẩm cụ thể",
+          "description": "Bốn sản phẩm mẫu đại diện cho một hệ sinh thái có thể mở rộng: điều khiển trung tâm, tương tác, an ninh và giám sát môi trường."
+        }
+      },
+      {
+        "id": "services",
+        "slug": "services",
+        "status": "published",
+        "data": {
+          "title": "Từ khảo sát đến vận hành, một đội ngũ xuyên suốt.",
+          "badge_template": "{{countService}} dịch vụ cụ thể",
+          "description": "LUMI CASA thiết kế giải pháp theo thói quen sử dụng thực tế thay vì lắp thật nhiều thiết bị không cần thiết."
+        }
+      },
+      {
+        "id": "contact",
+        "slug": "contact",
+        "status": "published",
+        "data": {
+          "title": "Biến nhu cầu của bạn thành một ngôi nhà dễ sống hơn.",
+          "badge_template": "Liên hệ",
+          "description": "Gửi thông tin cơ bản, đội ngũ tư vấn sẽ đề xuất cấu hình mẫu phù hợp cho căn hộ, nhà phố hoặc biệt thự."
+        }
+      }
+    ],
+    "contact_info": [
+      {
+        "id": "main",
+        "slug": "main",
+        "status": "published",
+        "data": {
+          "title": "Smart Home Studio",
+          "badge": "LUMI CASA Việt Nam",
+          "description": "Dữ liệu liên hệ dưới đây là nội dung mẫu cho website demo.",
+          "address": "128 Trần Duy Hưng, Cầu Giấy, Hà Nội",
+          "hotline": "0988 246 810",
+          "email": "hello@lumicasa.vn",
+          "working_hours": "08:30 – 18:00 • Thứ 2 đến Thứ 7"
+        }
+      }
+    ]
+  }
 }
