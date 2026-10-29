@@ -1,0 +1,60 @@
+---
+interface MenuItem {
+	label: string;
+	url: string;
+	target?: string | null;
+}
+
+interface SiteLogo {
+	url?: string;
+	alt?: string;
+}
+
+interface Props {
+	siteTitle: string;
+	siteLogo?: SiteLogo | null;
+	items: MenuItem[];
+	currentPath: string;
+}
+
+const { siteTitle, siteLogo, items, currentPath } = Astro.props;
+
+const isActive = (url: string) => {
+	if (url === "/") return currentPath === "/";
+	return currentPath === url || currentPath.startsWith(`${url}/`);
+};
+---
+
+<header class="site-header">
+	<div class="container site-header__inner">
+		<a class="site-brand" href="/" aria-label={`${siteTitle} — Trang chủ`}>
+			{
+				siteLogo?.url ? (
+					<img src={siteLogo.url} alt={siteLogo.alt || siteTitle} />
+				) : (
+					<>
+						<span class="site-brand__mark" aria-hidden="true"></span>
+						<span>{siteTitle}</span>
+					</>
+				)
+			}
+		</a>
+
+		<nav class="site-nav" aria-label="Điều hướng chính">
+			{
+				items.map((item) => (
+					<a
+						class:list={["site-nav__link", { "is-active": isActive(item.url) }]}
+						href={item.url}
+						target={item.target ?? undefined}
+						rel={item.target === "_blank" ? "noopener noreferrer" : undefined}
+						aria-current={isActive(item.url) ? "page" : undefined}
+					>
+						{item.label}
+					</a>
+				))
+			}
+			<a class="site-nav__cta" href="/contact">Nhận tư vấn</a>
+		</nav>
+	</div>
+</header>

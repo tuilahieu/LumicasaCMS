@@ -1,0 +1,24 @@
+---
+
+interface MenuItem {
+	label: string;
+	url: string;
+	target?: string | null;
+}
+
+interface Props {
+	siteTitle: string;
+	tagline?: string | null;
+	items: MenuItem[];
+}
+
+const { siteTitle, tagline, items } = Astro.props;
+---
+
+<footer class="site-footer">
+	<div class="container site-footer__inner">
+		{items.length > 0 ? items.map((item) => <p>{item.label}</p>) : <p>Chưa cài đặt</p>}
+<strong>{siteTitle}</strong>
+{tagline && <p>{tagline}</p>}
+	</div>
+</footer>

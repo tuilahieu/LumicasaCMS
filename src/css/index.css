@@ -1,0 +1,8 @@
+@import "./base/reset.css";
+@import "./base/variables.css";
+@import "./base/typography.css";
+@import "./base/global.css";
+
+@import "./layouts/container.css";
+@import "./layouts/header.css";
+@import "./layouts/footer.css";

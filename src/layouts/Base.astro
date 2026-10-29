@@ -2,7 +2,9 @@
 import { getMenuWithCacheHint, getSiteSettingsWithCacheHint } from "emdash";
 import { EmDashHead, EmDashBodyStart, EmDashBodyEnd } from "emdash/ui";
 import { createPublicPageContext } from "emdash/page";
-import LiveSearch from "emdash/ui/search";
+import Footer from "../components/layout/Footer.astro";
+import Header from "../components/layout/Header.astro";
+import "../css/index.css";
 import { resolveStarterSiteIdentity } from "../utils/site-identity";
 
 interface Props {
@@ -17,13 +19,17 @@ interface Props {
 
 const { title, pageTitle, description, image, canonical, content } =
 	Astro.props;
-const [settingsResult, menuResult] = await Promise.all([
+const [settingsResult, menuResult, footerResult] = await Promise.all([
 	getSiteSettingsWithCacheHint(),
 	getMenuWithCacheHint("primary"),
+	getMenuWithCacheHint("footer"),
 ]);
+// console.log("[getSiteSettingsWithCacheHint]", settingsResult)
+// console.log("[getMenuWithCacheHint]", menuResult)
 if (Astro.cache?.enabled) {
 	Astro.cache.set(settingsResult.cacheHint);
 	Astro.cache.set(menuResult.cacheHint);
+	Astro.cache.set(footerResult.cacheHint);
 }
 
 const { siteTitle, siteTagline, siteLogo } = resolveStarterSiteIdentity(
@@ -36,6 +42,7 @@ const titleIncludesSiteName =
 const fullTitle = titleIncludesSiteName ? title : `${title} — ${siteTitle}`;
 const pageDescription = description ?? siteTagline;
 const menu = menuResult.data;
+const footer = footerResult.data;
 
 const pageCtx = createPublicPageContext({
 	Astro,
@@ -52,7 +59,7 @@ const pageCtx = createPublicPageContext({
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="vi">
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -62,40 +69,18 @@ const pageCtx = createPublicPageContext({
 	<body>
 		<EmDashBodyStart page={pageCtx} />
 
-		<header>
-			<nav>
-				<a href="/">
-					{
-						siteLogo ? (
-							<img
-								src={siteLogo.url}
-								alt={siteLogo.alt || siteTitle}
-								style="height:48px;width:auto;margin:-8px 0;display:block;"
-							/>
-						) : (
-							siteTitle
-						)
-					}
-				</a>
-				{
-					menu?.items.map((item) => (
-						<a
-							href={item.url}
-							target={item.target}
-							rel={item.target === "_blank" ? "noopener noreferrer" : undefined}
-						>
-							{item.label}
-						</a>
-					))
-				}
-				<LiveSearch placeholder="Search..." collections={["posts", "pages"]} />
-			</nav>
-		</header>
+		<Header
+			siteTitle={siteTitle}
+			siteLogo={siteLogo}
+			items={menu?.items ?? []}
+			currentPath={Astro.url.pathname}
+		/>
 
-		<main>
+		<main id="main-content">
 			<slot />
 		</main>
 
+		<Footer siteTitle={siteTitle} tagline={siteTagline} items={footer?.items ?? []} />
 		<EmDashBodyEnd page={pageCtx} />
 	</body>
 </html>
