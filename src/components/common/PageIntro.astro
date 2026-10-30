@@ -1,0 +1,44 @@
+---
+import type { ContentEntry } from "emdash";
+import type { Page } from "../../../emdash-env";
+import { renderTemplate } from "../../utils/template";
+
+interface Props {
+	page: ContentEntry<Page>;
+	variables?: Record<string, string | number>;
+}
+
+const { page, variables = {} } = Astro.props;
+---
+
+<header class="page-intro">
+	{
+		page.data.badge_template && (
+			<p class="eyebrow" {...page.edit.badge_template}>
+				{renderTemplate(page.data.badge_template, variables)}
+			</p>
+		)
+	}
+	<h1 {...page.edit.title}>{page.data.title}</h1>
+	<p class="page-intro__description" {...page.edit.description}>
+		{page.data.description}
+	</p>
+</header>
+
+<style>
+	.page-intro {
+		display: grid;
+		gap: var(--space-3);
+		padding-block: var(--space-7) var(--space-6);
+	}
+
+	.page-intro h1 {
+		max-width: 22ch;
+	}
+
+	.page-intro__description {
+		max-width: 64ch;
+		color: var(--color-text-muted);
+		font-size: var(--text-lg);
+	}
+</style>

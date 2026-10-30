@@ -1,0 +1,51 @@
+---
+import { getEmDashCollection, getEmDashEntry } from "emdash";
+import CtaBanner from "../components/home/CtaBanner.astro";
+import EmptyState from "../components/common/EmptyState.astro";
+import PageIntro from "../components/common/PageIntro.astro";
+import ProductCard from "../components/common/ProductCard.astro";
+import Base from "../layouts/Base.astro";
+import "../css/pages/products.css";
+
+const [introResult, productsResult] = await Promise.all([
+	getEmDashEntry("pages", "products"),
+	getEmDashCollection("products", {
+		status: "published",
+		orderBy: { sort_order: "asc" },
+		limit: 100,
+	}),
+]);
+
+if (Astro.cache?.enabled) {
+	Astro.cache.set(introResult.cacheHint);
+	Astro.cache.set(productsResult.cacheHint);
+}
+
+const intro = introResult.entry;
+const products = productsResult.entries;
+---
+
+<Base title={intro?.data.title ?? "Sản phẩm"} description={intro?.data.description}>
+	<div class="container page-shell products-page">
+		{intro && <PageIntro page={intro} variables={{ countProduct: products.length }} />}
+
+		{
+			products.length > 0 ? (
+				<div class="products-page__grid">
+					{products.map((product) => <ProductCard product={product} />)}
+				</div>
+			) : (
+				<EmptyState title="Chưa có sản phẩm" description="Sản phẩm sẽ xuất hiện sau khi được publish trong EmDash Admin." />
+			)
+		}
+
+		<div class="products-page__cta">
+			<CtaBanner
+				title="Không cần mua tất cả ngay từ đầu."
+				description="Bạn có thể triển khai từng khu vực trước rồi mở rộng sau mà không phải thay lại toàn bộ hệ thống."
+				label="Nhận cấu hình đề xuất"
+				url="/contact"
+			/>
+		</div>
+	</div>
+</Base>
