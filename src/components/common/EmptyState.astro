@@ -1,0 +1,28 @@
+---
+interface Props {
+	title: string;
+	description?: string;
+}
+
+const { title, description } = Astro.props;
+---
+
+<div class="empty-state" role="status">
+	<h2>{title}</h2>
+	{description && <p>{description}</p>}
+</div>
+
+<style>
+	.empty-state {
+		padding: var(--space-6) var(--space-4);
+		border: 1px dashed var(--color-border);
+		border-radius: var(--radius-md);
+		text-align: center;
+		color: var(--color-text-muted);
+	}
+
+	.empty-state h2 {
+		margin-bottom: var(--space-2);
+		color: var(--color-text);
+	}
+</style>

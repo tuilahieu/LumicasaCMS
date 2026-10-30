@@ -1,0 +1,71 @@
+---
+import type { ContentEntry } from "emdash";
+import { Image } from "emdash/ui";
+import type { Product } from "../../../emdash-env";
+import { formatVnd } from "../../utils/format";
+
+interface Props {
+	product: ContentEntry<Product>;
+}
+
+const { product } = Astro.props;
+const category = product.data.terms?.product_category?.[0];
+---
+
+<article class="product-card">
+	<div class="product-card__image" {...product.edit.image}>
+		<Image image={product.data.image} />
+	</div>
+	<div class="product-card__body">
+		{category && <p class="eyebrow">{category.label}</p>}
+		<h2 {...product.edit.title}>{product.data.title}</h2>
+		<p {...product.edit.description}>{product.data.description}</p>
+		<strong {...product.edit.price}>{formatVnd(product.data.price)}</strong>
+	</div>
+</article>
+
+<style>
+	.product-card {
+		display: grid;
+		grid-template-rows: auto 1fr;
+		overflow: hidden;
+		min-width: 0;
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-md);
+		background: var(--color-surface);
+	}
+
+	.product-card__image {
+		aspect-ratio: 4 / 3;
+		margin: var(--space-3);
+		overflow: hidden;
+		border-radius: calc(var(--radius-md) - 0.45rem);
+		background: var(--color-surface-raised);
+	}
+
+	.product-card__image :global(img) {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+	}
+
+	.product-card__body {
+		display: grid;
+		align-content: start;
+		gap: var(--space-2);
+		padding: 0 var(--space-4) var(--space-4);
+	}
+
+	.product-card h2 {
+		font-size: var(--text-xl);
+	}
+
+	.product-card p:not(.eyebrow) {
+		color: var(--color-text-muted);
+	}
+
+	.product-card strong {
+		margin-top: var(--space-2);
+		font-size: var(--text-lg);
+	}
+</style>

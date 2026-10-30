@@ -1,50 +1,54 @@
 ---
-import { getEmDashCollection, getSiteSettings } from "emdash";
-import { Image } from "emdash/ui";
+import { getEmDashCollection, getEmDashEntry } from "emdash";
+import CtaBanner from "../components/home/CtaBanner.astro";
+import FeaturedProducts from "../components/home/FeaturedProducts.astro";
+import Hero from "../components/home/Hero.astro";
 import Base from "../layouts/Base.astro";
-import { resolveStarterSiteIdentity } from "../utils/site-identity";
+import "../css/pages/home.css";
 
-const { entries: posts, cacheHint } = await getEmDashCollection("posts", {
-	orderBy: { published_at: "desc" },
-	limit: 10,
-});
-const { siteTitle, siteTagline } = resolveStarterSiteIdentity(
-	await getSiteSettings(),
-);
-if (Astro.cache?.enabled) Astro.cache.set(cacheHint);
+const [heroResult, introResult, productsResult, servicesResult] = await Promise.all([
+	getEmDashEntry("hero_ctas", "homepage"),
+	getEmDashEntry("pages", "home"),
+	getEmDashCollection("products", {
+		status: "published",
+		orderBy: { sort_order: "asc" },
+		limit: 100,
+	}),
+	getEmDashCollection("services", {
+		status: "published",
+		orderBy: { sort_order: "asc" },
+		limit: 100,
+	}),
+]);
+
+if (Astro.cache?.enabled) {
+	Astro.cache.set(heroResult.cacheHint);
+	Astro.cache.set(introResult.cacheHint);
+	Astro.cache.set(productsResult.cacheHint);
+	Astro.cache.set(servicesResult.cacheHint);
+}
+
+const hero = heroResult.entry;
+const intro = introResult.entry;
+const products = productsResult.entries;
+const services = servicesResult.entries;
 ---
 
-<Base title={siteTitle} description={siteTagline}>
-	<h1>Recent Posts</h1>
+<Base
+	title="Trang chủ"
+	description="Giải pháp Smart Home, an ninh và tự động hóa cho không gian sống hiện đại."
+>
+	<div class="home-page">
+		{hero && <Hero hero={hero} countProduct={products.length} countService={services.length} />}
+		{intro && <FeaturedProducts intro={intro} products={products} />}
 
-	{
-		posts.length === 0 ? (
-			<p>
-				No posts yet. <a href="/_emdash/admin/content/posts/new">Create one</a>.
-			</p>
-		) : (
-			<ul>
-				{posts.map((post) => (
-					<li>
-						<a href={`/posts/${post.id}`}>
-							{post.data.featured_image && (
-								<div {...post.edit.featured_image}><Image image={post.data.featured_image} /></div>
-							)}
-							<h2 {...post.edit.title}>{post.data.title}</h2>
-						</a>
-						{post.data.excerpt && <p {...post.edit.excerpt}>{post.data.excerpt}</p>}
-						{post.data.publishedAt && (
-							<time datetime={post.data.publishedAt.toISOString()}>
-								{post.data.publishedAt.toLocaleDateString("en-US", {
-									year: "numeric",
-									month: "long",
-									day: "numeric",
-								})}
-							</time>
-						)}
-					</li>
-				))}
-			</ul>
-		)
-	}
+		<div class="container home-page__cta">
+			<CtaBanner
+				title="Bắt đầu từ một phòng, mở rộng cho cả ngôi nhà."
+				description="Đội ngũ LUMI CASA khảo sát nhu cầu và đề xuất cấu hình phù hợp theo ngân sách."
+				label="Đặt lịch tư vấn"
+				url="/contact"
+			/>
+		</div>
+	</div>
 </Base>

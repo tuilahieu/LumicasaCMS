@@ -1,0 +1,166 @@
+---
+import type { ContentEntry } from "emdash";
+import { Image } from "emdash/ui";
+import type { HeroCta } from "../../../emdash-env";
+import { renderTemplate } from "../../utils/template";
+import Button from "../common/Button.astro";
+
+interface Props {
+	hero: ContentEntry<HeroCta>;
+	countProduct: number;
+	countService: number;
+}
+
+const { hero, countProduct, countService } = Astro.props;
+const variables = { countProduct, countService };
+// console.log('hero', hero)
+---
+
+<section class="hero section">
+	<div class="container hero__grid">
+		<div class="hero__content">
+			{hero.data.badge && <p class="hero__badge" {...hero.edit.badge}>{hero.data.badge}</p>}
+			<h1 {...hero.edit.title}>{hero.data.title}</h1>
+			{hero.data.description && <p class="hero__description" {...hero.edit.description}>{hero.data.description}</p>}
+
+			{
+				hero.data.cta_buttons && hero.data.cta_buttons.length > 0 && (
+					<div class="hero__actions" {...hero.edit.cta_buttons}>
+						{hero.data.cta_buttons.map((button) => (
+							<Button href={button.url} variant={button.variant === "secondary" ? "secondary" : "primary"}>
+								{renderTemplate(button.label_template, variables)}
+							</Button>
+						))}
+					</div>
+				)
+			}
+		</div>
+
+		<div class="hero__visual">
+			<div class="hero__image" {...hero.edit.image}>
+				<Image image={hero.data.image} />
+			</div>
+			{
+				hero.data.stats && hero.data.stats.length > 0 && (
+					<div class="hero__stats" {...hero.edit.stats}>
+						{hero.data.stats.map((stat) => (
+							<div class="hero__stat">
+								<strong>{renderTemplate(stat.value_template, variables)}</strong>
+								<span>{stat.label}</span>
+							</div>
+						))}
+					</div>
+				)
+			}
+		</div>
+	</div>
+</section>
+
+<style>
+	.hero {
+		background:
+			radial-gradient(circle at 16% 20%, rgb(84 219 199 / 10%), transparent 34%),
+			var(--color-background);
+	}
+
+	.hero__grid {
+		display: grid;
+		grid-template-columns: minmax(0, 1.05fr) minmax(20rem, 0.95fr);
+		align-items: center;
+		gap: var(--space-7);
+	}
+
+	.hero__content {
+		display: grid;
+		justify-items: start;
+		gap: var(--space-4);
+	}
+
+	.hero__badge {
+		padding: 0.55rem 1rem;
+		border: 1px solid var(--color-border);
+		border-radius: 999px;
+		color: var(--color-primary);
+		font-size: var(--text-sm);
+		font-weight: 700;
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+	}
+
+	.hero h1 {
+		max-width: 10ch;
+		font-size: clamp(3.5rem, 7vw, 7.6rem);
+		line-height: 0.94;
+	}
+
+	.hero__description {
+		max-width: 60ch;
+		color: var(--color-text-muted);
+		font-size: var(--text-lg);
+	}
+
+	.hero__actions {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space-2);
+	}
+
+	.hero__visual {
+		padding: var(--space-4);
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-lg);
+		background: var(--color-surface);
+	}
+
+	.hero__image {
+		aspect-ratio: 4 / 3;
+		overflow: hidden;
+		border-radius: var(--radius-md);
+	}
+
+	.hero__image :global(img) {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+	}
+
+	.hero__stats {
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: var(--space-2);
+		margin-top: var(--space-3);
+	}
+
+	.hero__stat {
+		display: grid;
+		gap: 0.25rem;
+		padding: var(--space-3);
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-sm);
+	}
+
+	.hero__stat strong {
+		font-size: var(--text-xl);
+	}
+
+	.hero__stat span {
+		color: var(--color-text-muted);
+		font-size: var(--text-sm);
+	}
+
+	@media (max-width: 900px) {
+		.hero__grid {
+			grid-template-columns: 1fr;
+		}
+
+		.hero h1 {
+			font-size: clamp(3rem, 14vw, 5.5rem);
+		}
+	}
+
+	@media (max-width: 560px) {
+		.hero__stats {
+			grid-template-columns: 1fr;
+		}
+	}
+</style>

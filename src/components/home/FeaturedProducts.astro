@@ -1,0 +1,83 @@
+---
+import type { ContentEntry } from "emdash";
+import type { Page, Product } from "../../../emdash-env";
+import EmptyState from "../common/EmptyState.astro";
+import ProductCard from "../common/ProductCard.astro";
+
+interface Props {
+	intro: ContentEntry<Page>;
+	products: ContentEntry<Product>[];
+}
+
+const { intro, products } = Astro.props;
+---
+
+<section class="section featured-products">
+	<div class="container">
+		<header class="section-heading">
+			<div>
+				{intro.data.badge_template && <p class="eyebrow" {...intro.edit.badge_template}>{intro.data.badge_template}</p>}
+				<h2 {...intro.edit.title}>{intro.data.title}</h2>
+			</div>
+			<p {...intro.edit.description}>{intro.data.description}</p>
+		</header>
+
+		{
+			products.length > 0 ? (
+				<div class="product-grid">
+					{products.map((product) => <ProductCard product={product} />)}
+				</div>
+			) : (
+				<EmptyState title="Chưa có sản phẩm" description="Sản phẩm sẽ xuất hiện sau khi được publish trong EmDash Admin." />
+			)
+		}
+	</div>
+</section>
+
+<style>
+	.section-heading {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) minmax(18rem, 0.8fr);
+		align-items: end;
+		gap: var(--space-6);
+		margin-bottom: var(--space-5);
+	}
+
+	.section-heading > div {
+		display: grid;
+		gap: var(--space-2);
+	}
+
+	.section-heading h2 {
+		max-width: 16ch;
+		font-size: clamp(2.4rem, 5vw, 4.8rem);
+	}
+
+	.section-heading > p {
+		color: var(--color-text-muted);
+		font-size: var(--text-lg);
+	}
+
+	.product-grid {
+		display: grid;
+		grid-template-columns: repeat(4, minmax(0, 1fr));
+		gap: var(--space-3);
+	}
+
+	@media (max-width: 1100px) {
+		.product-grid {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+	}
+
+	@media (max-width: 700px) {
+		.section-heading {
+			grid-template-columns: 1fr;
+			gap: var(--space-3);
+		}
+
+		.product-grid {
+			grid-template-columns: 1fr;
+		}
+	}
+</style>
