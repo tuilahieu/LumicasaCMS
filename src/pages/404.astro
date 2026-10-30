@@ -1,9 +1,16 @@
 ---
 import Base from "../layouts/Base.astro";
+import Button from "../components/common/Button.astro";
+import "../css/pages/content-page.css";
 ---
 
-<Base title="Not Found">
-	<h1>Page not found</h1>
-	<p>The page you're looking for doesn't exist.</p>
-	<a href="/">Go home</a>
+<Base title="Không tìm thấy trang">
+	<div class="container content-page">
+		<article class="content-page__article">
+			<p class="eyebrow">404</p>
+			<h1>Không tìm thấy trang.</h1>
+			<p>Đường dẫn bạn đang truy cập không tồn tại hoặc đã được thay đổi.</p>
+			<div><Button href="/">Về trang chủ</Button></div>
+		</article>
+	</div>
 </Base>

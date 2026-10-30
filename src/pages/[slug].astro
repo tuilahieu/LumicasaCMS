@@ -1,24 +1,17 @@
 ---
-import { getEmDashEntry, getSeoMeta, decodeSlug, getSiteSettings } from "emdash";
-import { PortableText } from "emdash/ui";
+import { decodeSlug, getEmDashEntry, getSeoMeta, getSiteSettings } from "emdash";
 import Base from "../layouts/Base.astro";
 import { resolveStarterSiteIdentity } from "../utils/site-identity";
+import "../css/pages/content-page.css";
 
 const slug = decodeSlug(Astro.params.slug);
-
-if (!slug) {
-	return Astro.rewrite("/404");
-}
+if (!slug) return Astro.rewrite("/404");
 
 const { entry: page, cacheHint } = await getEmDashEntry("pages", slug);
-
-if (!page) {
-	return Astro.rewrite("/404");
-}
+if (!page) return Astro.rewrite("/404");
 
 if (Astro.cache?.enabled) Astro.cache.set(cacheHint);
 const { siteTitle } = resolveStarterSiteIdentity(await getSiteSettings());
-
 const seo = getSeoMeta(page, {
 	siteTitle,
 	siteUrl: Astro.url.origin,
@@ -33,9 +26,11 @@ const seo = getSeoMeta(page, {
 	canonical={seo.canonical}
 	content={{ collection: "pages", id: page.data.id, slug }}
 >
-	<article>
-		<h1 {...page.edit.title}>{page.data.title}</h1>
-
-		<PortableText value={page.data.content} />
-	</article>
+	<div class="container content-page">
+		<article class="content-page__article">
+			{page.data.badge_template && <p class="eyebrow" {...page.edit.badge_template}>{page.data.badge_template}</p>}
+			<h1 {...page.edit.title}>{page.data.title}</h1>
+			<p {...page.edit.description}>{page.data.description}</p>
+		</article>
+	</div>
 </Base>
