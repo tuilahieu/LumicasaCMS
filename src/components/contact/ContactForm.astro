@@ -1,0 +1,214 @@
+---
+interface Props {
+	submitted?: boolean;
+	name?: string;
+}
+
+const { submitted = false, name = "" } = Astro.props;
+---
+
+<form method="POST" action="/contact" class="contact-form" id="contact-form">
+	<div class="contact-form__grid">
+		<label>
+			<span>Họ và tên</span>
+			<input name="name" autocomplete="name" placeholder="Nguyễn Văn A" required />
+		</label>
+		<label>
+			<span>Số điện thoại</span>
+			<input
+				name="phone"
+				type="tel"
+				autocomplete="tel"
+				placeholder="09xx xxx xxx"
+				pattern="[0-9+() .-]{8,20}"
+				required
+			/>
+		</label>
+		<label>
+			<span>Loại nhà</span>
+			<input name="homeType" placeholder="Căn hộ / Nhà phố / Biệt thự" />
+		</label>
+		<label>
+			<span>Ngân sách dự kiến</span>
+			<input name="budget" placeholder="Ví dụ: 30–50 triệu" />
+		</label>
+	</div>
+
+	<label>
+		<span>Nhu cầu của bạn</span>
+		<textarea name="message" rows="6" placeholder="Tôi muốn ưu tiên ánh sáng, an ninh và điều hòa..." required />
+	</label>
+
+	<button type="submit">Gửi yêu cầu tư vấn</button>
+</form>
+
+{
+	submitted && (
+		<div class="feedback-modal">
+			<a class="feedback-modal__backdrop" href="/contact" aria-label="Đóng thông báo" />
+			<section
+				class="feedback-modal__dialog"
+				role="dialog"
+				aria-modal="true"
+				aria-labelledby="feedback-modal-title"
+				aria-describedby="feedback-modal-description"
+			>
+				<a class="feedback-modal__close" href="/contact" aria-label="Đóng thông báo">×</a>
+				<div class="feedback-modal__icon" aria-hidden="true">✓</div>
+				<p class="eyebrow">Đã nhận thông tin</p>
+				<h2 id="feedback-modal-title">Cảm ơn {name || "bạn"} đã quan tâm.</h2>
+				<p id="feedback-modal-description">
+					Đội ngũ LUMI CASA sẽ liên hệ để tư vấn giải pháp phù hợp trong thời gian sớm nhất.
+				</p>
+				<a class="feedback-modal__action" href="/contact">Đóng thông báo</a>
+			</section>
+		</div>
+	)
+}
+
+<style>
+	.contact-form {
+		display: grid;
+		gap: var(--space-3);
+		padding: clamp(1.25rem, 3vw, 2.5rem);
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-md);
+		background: var(--color-surface);
+	}
+
+	.contact-form__grid {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: var(--space-3);
+	}
+
+	.contact-form label {
+		display: grid;
+		gap: 0.5rem;
+		font-weight: 650;
+	}
+
+	.contact-form input,
+	.contact-form textarea {
+		width: 100%;
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-sm);
+		padding: 0.9rem 1rem;
+		color: var(--color-text);
+		background: var(--color-background-soft);
+	}
+
+	.contact-form textarea {
+		resize: vertical;
+	}
+
+	.contact-form button {
+		min-height: 3.5rem;
+		border: 0;
+		border-radius: var(--radius-sm);
+		color: var(--color-background);
+		background: var(--color-primary);
+		font-weight: 800;
+		cursor: pointer;
+	}
+
+	.feedback-modal {
+		position: fixed;
+		z-index: 1000;
+		inset: 0;
+		display: grid;
+		place-items: center;
+		padding: var(--space-3);
+	}
+
+	.feedback-modal__backdrop {
+		position: absolute;
+		inset: 0;
+		background: rgb(3 15 14 / 72%);
+		backdrop-filter: blur(8px);
+	}
+
+	.feedback-modal__dialog {
+		position: relative;
+		z-index: 1;
+		display: grid;
+		width: min(100%, 34rem);
+		gap: var(--space-3);
+		padding: clamp(1.5rem, 5vw, 3rem);
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-lg);
+		box-shadow: 0 2rem 6rem rgb(0 0 0 / 35%);
+		background: var(--color-surface);
+		text-align: center;
+		animation: feedback-modal-in 180ms ease-out;
+	}
+
+	.feedback-modal__dialog .eyebrow {
+		justify-self: center;
+	}
+
+	.feedback-modal__dialog h2 {
+		font-size: var(--text-2xl);
+	}
+
+	.feedback-modal__dialog > p:not(.eyebrow) {
+		color: var(--color-text-muted);
+	}
+
+	.feedback-modal__icon {
+		display: grid;
+		width: 4rem;
+		height: 4rem;
+		place-items: center;
+		justify-self: center;
+		border-radius: 50%;
+		color: var(--color-background);
+		background: var(--color-primary);
+		font-size: var(--text-2xl);
+		font-weight: 900;
+	}
+
+	.feedback-modal__close {
+		position: absolute;
+		top: 0.75rem;
+		right: 0.9rem;
+		color: var(--color-text-muted);
+		font-size: 1.75rem;
+		line-height: 1;
+		text-decoration: none;
+	}
+
+	.feedback-modal__action {
+		justify-self: center;
+		padding: 0.85rem 1.4rem;
+		border-radius: var(--radius-sm);
+		color: var(--color-background);
+		background: var(--color-primary);
+		font-weight: 700;
+		text-decoration: none;
+	}
+
+	@keyframes feedback-modal-in {
+		from {
+			opacity: 0;
+			transform: translateY(0.75rem) scale(0.98);
+		}
+
+		to {
+			opacity: 1;
+			transform: translateY(0) scale(1);
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.feedback-modal__dialog {
+			animation: none;
+		}
+	}
+
+	@media (max-width: 700px) {
+		.contact-form__grid {
+			grid-template-columns: 1fr;
+		}
+	}
+</style>

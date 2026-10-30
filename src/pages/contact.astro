@@ -1,0 +1,78 @@
+---
+import { getEmDashEntry } from "emdash";
+import ContactForm from "../components/contact/ContactForm.astro";
+import PageIntro from "../components/common/PageIntro.astro";
+import Base from "../layouts/Base.astro";
+import "../css/pages/contact.css";
+
+export const prerender = false;
+
+if (Astro.request.method === "POST") {
+	const formData = await Astro.request.formData();
+	const rawName = formData.get("name");
+	const name = typeof rawName === "string" ? rawName.trim().slice(0, 100) : "";
+
+	if (!name) {
+		return new Response("Vui lòng nhập họ và tên.", { status: 400 });
+	}
+
+	const redirectUrl = new URL("/contact", Astro.url);
+	redirectUrl.searchParams.set("feedback", "true");
+	redirectUrl.searchParams.set("name", name);
+
+	return Astro.redirect(`${redirectUrl.pathname}${redirectUrl.search}`, 303);
+}
+
+const [introResult, contactResult] = await Promise.all([
+	getEmDashEntry("pages", "contact"),
+	getEmDashEntry("contact_info", "main"),
+]);
+
+if (Astro.cache?.enabled) {
+	Astro.cache.set(introResult.cacheHint);
+	Astro.cache.set(contactResult.cacheHint);
+}
+
+const intro = introResult.entry;
+const contact = contactResult.entry;
+const submitted = Astro.url.searchParams.get("feedback") === "true";
+const submittedName = Astro.url.searchParams.get("name")?.trim() ?? "";
+---
+
+<Base title={intro?.data.title ?? "Liên hệ"} description={intro?.data.description}>
+	<div class="container page-shell contact-page">
+		{intro && <PageIntro page={intro} />}
+
+		<div class="contact-page__grid">
+			{
+				contact && (
+					<aside class="contact-card">
+						{contact.data.badge && <p class="eyebrow" {...contact.edit.badge}>{contact.data.badge}</p>}
+						<h2 {...contact.edit.title}>{contact.data.title}</h2>
+						{contact.data.description && <p class="contact-card__description" {...contact.edit.description}>{contact.data.description}</p>}
+
+						<dl>
+							<div>
+								<dt>Địa chỉ</dt>
+								<dd {...contact.edit.address}>{contact.data.address}</dd>
+							</div>
+							<div>
+								<dt>Hotline</dt>
+								<dd {...contact.edit.hotline}><a href={`tel:${contact.data.hotline.replace(/\s/g, "")}`}>{contact.data.hotline}</a></dd>
+							</div>
+							<div>
+								<dt>Email</dt>
+								<dd {...contact.edit.email}><a href={`mailto:${contact.data.email}`}>{contact.data.email}</a></dd>
+							</div>
+							<div>
+								<dt>Giờ làm việc</dt>
+								<dd {...contact.edit.working_hours}>{contact.data.working_hours}</dd>
+							</div>
+						</dl>
+					</aside>
+				)
+			}
+			<ContactForm submitted={submitted} name={submittedName} />
+		</div>
+	</div>
+</Base>
