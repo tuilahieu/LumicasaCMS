@@ -1,362 +1,309 @@
 # LUMI CASA — EmDash Smart Home
 
-Website Smart Home được chuyển đổi từ một file HTML tĩnh sang Astro + EmDash CMS và triển khai theo kiến trúc Cloudflare Workers, D1 và R2.
+Website giới thiệu giải pháp Smart Home được xây dựng bằng Astro và EmDash CMS. Public site được server-rendered trên Cloudflare Workers; structured content lưu trong Cloudflare D1 và media lưu trong Cloudflare R2.
 
-> Trạng thái hiện tại: content model đã được thiết kế; `seed/seed.json` và frontend vẫn đang trong quá trình chuyển đổi từ Starter template.
+## Tổng quan
 
-## 1. Mục tiêu
+Các route chính:
 
-- Giữ bốn khu vực chính: Trang chủ, Sản phẩm, Dịch vụ và Liên hệ.
-- Cho phép quản trị Product, Service, nội dung giới thiệu trang, Hero/CTA, thông tin liên hệ và menu từ EmDash Admin.
-- Lưu dữ liệu CMS trong Cloudflare D1 và media trong Cloudflare R2 ở production.
-- Không hard-code danh sách Product hoặc Service trong component.
-- Hỗ trợ CRUD, draft/published, responsive và xử lý dữ liệu rỗng an toàn.
-- Form liên hệ có validation và feedback khi submit; không bắt buộc gửi email hoặc lưu lead.
-
-## 2. Công nghệ
-
-| Thành phần | Công nghệ |
+| Route | Nội dung |
 | --- | --- |
-| Frontend/CMS | Astro 7, EmDash 1.3 |
-| Admin UI | EmDash Admin |
-| Production runtime | Cloudflare Workers |
-| Database | Cloudflare D1 |
-| Media storage | Cloudflare R2 |
-| UI tương tác | React 19 khi cần |
-| Ngôn ngữ | TypeScript, JavaScript, HTML, CSS |
-
-Project dùng server rendering với `output: "server"`. Nội dung CMS không dùng `getStaticPaths()`.
-
-## 3. Kiến trúc
-
-```text
-EmDash Admin
-├── Structured content ──> Cloudflare D1
-├── Product/Service media ──> Cloudflare R2
-└── Menu/Site Settings ──> Cloudflare D1
-
-Astro server-rendered routes
-├── Query content từ EmDash
-├── Render media bằng <Image /> của emdash/ui
-└── Trả HTML cho trình duyệt
-```
-
-Bindings được dùng trong source:
-
-| Binding | Resource | Tên hiện tại |
-| --- | --- | --- |
-| `DB` | Cloudflare D1 | `lumicasa` |
-| `MEDIA` | Cloudflare R2 | `lumicasa` |
-
-Các binding được khai báo trong `wrangler.jsonc` và được truyền vào EmDash trong `astro.config.mjs`.
-
-## 4. Content model đã chốt
-
-### Bước 1 — Site Settings
-
-Dùng Site Settings built-in của EmDash:
-
-| Field | Mục đích |
-| --- | --- |
-| `title` | Tên website |
-| `tagline` | Tagline chung và nội dung ngắn ở footer |
-| `logo` | Logo header |
-| `favicon` | Favicon |
-| SEO settings | Metadata mặc định |
-
-Copyright footer được tạo từ năm hiện tại và `title`; không cần collection Footer riêng.
-
-### Bước 2 — Hero/CTA trang chủ
-
-Collection `hero_ctas`, dùng một entry có slug `homepage`.
-
-| Field | Type | Ghi chú |
-| --- | --- | --- |
-| `badge` | `string` | Nhãn phía trên heading |
-| `title` | `string` | Heading chính |
-| `description` | `text` | Nội dung giới thiệu |
-| `cta_buttons` | `repeater` | Danh sách nút CTA |
-| `image` | `image` | Ảnh Hero quản lý qua Media/R2 |
-| `stats` | `repeater` | Các số liệu bên dưới ảnh |
-
-`cta_buttons` gồm:
-
-| Subfield | Type | Ghi chú |
-| --- | --- | --- |
-| `label_template` | `string` | Hỗ trợ token, ví dụ `Xem {{countProduct}} sản phẩm` |
-| `url` | `url` | URL tuyệt đối hoặc đường dẫn như `/products` |
-| `variant` | `select` | `primary` hoặc `secondary` |
-
-`stats` gồm:
-
-| Subfield | Type | Ghi chú |
-| --- | --- | --- |
-| `value_template` | `string` | Ví dụ `{{countProduct}}`, `{{countService}}`, `24/7` |
-| `label` | `string` | Ví dụ `Sản phẩm chủ lực` |
-
-Các token động được frontend thay bằng dữ liệu query từ Product/Service. Token không hợp lệ được giữ nguyên để tránh lỗi trang.
-
-### Bước 3 — Product
-
-Collection `products`:
-
-| Field | Type | Ghi chú |
-| --- | --- | --- |
-| `title` | `string` | Tên sản phẩm |
-| `description` | `text` | Mô tả ngắn |
-| `price` | `integer` | Giá VND, ví dụ `2490000` |
-| `image` | `image` | Ảnh qua Media/R2 |
-| `sort_order` | `integer` | Thứ tự hiển thị |
-
-Collection supports:
-
-```text
-drafts, revisions
-```
-
-Không tạo field `publish`; trạng thái draft/published do EmDash quản lý. `entry.id` là slug dùng cho URL/định danh, còn `entry.data.id` là ULID dùng cho API như taxonomy.
-
-#### Product Category taxonomy
-
-Taxonomy `product_category` được gắn với collection `products`. Taxonomy này được dùng thật để admin tạo, đổi tên và tái sử dụng nhóm cho nhiều sản phẩm.
-
-| Slug | Label |
-| --- | --- |
-| `trung-tam` | Trung tâm điều khiển |
-| `dieu-khien` | Điều khiển / công tắc |
-| `an-ninh` | An ninh |
-| `cam-bien` | Cảm biến / môi trường |
-
-Quy ước mỗi Product chọn một Product Category. Khi render term của một Product, frontend gọi `getEntryTerms("products", product.data.id, "product_category")`.
-
-Không tạo taxonomy Tag vì giao diện và yêu cầu hiện tại không sử dụng tag.
-
-### Bước 4 — Service
-
-Collection `services`:
-
-| Field | Type | Ghi chú |
-| --- | --- | --- |
-| `title` | `string` | Tên dịch vụ |
-| `description` | `text` | Mô tả dịch vụ |
-| `image` | `image` | Một ảnh đại diện qua Media/R2 |
-| `features` | `repeater` | Danh sách bullet |
-| `sort_order` | `integer` | Thứ tự hiển thị |
-
-`features` có một subfield:
-
-| Subfield | Type |
-| --- | --- |
-| `text` | `string` |
-
-Collection supports:
-
-```text
-drafts, revisions
-```
-
-Không có `icon_key`, `featured` hoặc field `publish`. Tất cả Service đã published được hiển thị theo `sort_order`.
-
-### Bước 5 — Page intro/settings
-
-Collection `pages` quản lý phần heading/intro của các route có layout cố định.
-
-| Field | Type | Ghi chú |
-| --- | --- | --- |
-| `title` | `string` | Heading của trang hoặc section chính |
-| `badge_template` | `string`, optional | Có thể dùng token như `{{countService}} dịch vụ cụ thể` |
-| `description` | `text` | Mô tả dưới heading |
-
-Collection supports:
-
-```text
-drafts, revisions, seo
-```
-
-Các entry dự kiến:
-
-| Entry slug | Nơi sử dụng |
-| --- | --- |
-| `home` | Heading phần sản phẩm nổi bật trên trang chủ |
-| `products` | Intro route `/products` |
-| `services` | Intro route `/services` |
-| `contact` | Intro/thông tin dẫn nhập route `/contact` |
-
-Layout của từng route được viết trong Astro; admin quản lý nội dung, không quản lý cấu trúc component. Dự án chưa cần page-builder `blocks`.
-
-### Bước 6 — Contact information
-
-Collection `contact_info`, dùng một entry có slug `main`.
-
-| Field | Type |
-| --- | --- |
-| `badge` | `string` |
-| `title` | `string` |
-| `description` | `text` |
-| `address` | `text` |
-| `hotline` | `string` |
-| `email` | `string` |
-| `working_hours` | `string` |
-
-Form liên hệ được viết cố định trong `ContactForm.astro`, gồm:
-
-- Họ và tên — bắt buộc.
-- Số điện thoại — bắt buộc, validate định dạng cơ bản.
-- Loại nhà — không bắt buộc.
-- Ngân sách dự kiến — không bắt buộc.
-- Nhu cầu — bắt buộc.
-
-Form có trạng thái đang gửi, lỗi validation và thông báo thành công. Core scope không gửi email và không lưu lead.
-
-### Bước 7 — Menu
-
-Dùng Menu built-in của EmDash với menu `primary`:
-
-| Label | URL |
-| --- | --- |
-| Trang chủ | `/` |
-| Sản phẩm | `/products` |
-| Dịch vụ | `/services` |
-| Liên hệ | `/contact` |
-
-Header query menu từ EmDash; active state được xác định từ URL hiện tại.
-
-## 5. Route và nguồn dữ liệu
-
-| Route | Nguồn dữ liệu |
-| --- | --- |
-| `/` | `hero_ctas/homepage`, `pages/home`, Products, Services count, primary menu, Site Settings |
-| `/products` | `pages/products`, Products, Product Category taxonomy, primary menu, Site Settings |
-| `/services` | `pages/services`, Services, primary menu, Site Settings |
-| `/contact` | `pages/contact`, `contact_info/main`, primary menu, Site Settings |
-
-Product và Service được query theo `sort_order`. Chỉ entry published xuất hiện ở public site. Giao diện phải xử lý collection rỗng, field optional, ảnh thiếu và entry bị xóa mà không crash.
-
-## 6. Dữ liệu mẫu bắt buộc
-
-### Products
-
-| Product | Category | Price |
-| --- | --- | ---: |
-| Lumi Hub One | Trung tâm điều khiển | 2.490.000đ |
-| Lumi Touch S | Điều khiển / công tắc | 1.290.000đ |
-| Lumi Guard Cam | An ninh | 1.890.000đ |
-| Lumi Air Sense | Cảm biến / môi trường | 990.000đ |
-
-### Services
-
-1. Khảo sát & tư vấn.
-2. Thiết kế kịch bản Smart Home.
-3. Lắp đặt thiết bị.
-4. Tích hợp an ninh.
-5. Bảo trì & nâng cấp.
-6. Hỗ trợ từ xa.
-
-Ảnh Product/Service phải được quản lý qua EmDash Media và lưu bằng R2 ở production; component không hard-code URL Pexels.
-
-## 7. Chạy local
-
-### Yêu cầu
-
-- Node.js `>=22.23.4`.
-- npm `>=9.6.5`.
+| `/` | Hero, sản phẩm nổi bật và CTA |
+| `/products` | Danh sách sản phẩm đã publish |
+| `/services` | Danh sách dịch vụ đã publish |
+| `/contact` | Thông tin liên hệ và form tư vấn |
+| `/{slug}` | Page động từ collection `pages` |
+| `/_emdash/admin` | EmDash Admin |
+
+Project dùng `output: "server"`; content CMS không dùng `getStaticPaths()`.
+
+## Prerequisites
+
+- Node.js `>= 22.23.4`.
+- npm `>= 9.6.5`.
 - Git.
-- Cloudflare Wrangler được cài qua dependencies của project.
+- Trình duyệt hỗ trợ passkey/WebAuthn để đăng nhập EmDash Admin.
+- Để deploy: tài khoản Cloudflare có Workers, D1 và R2; repository GitHub được kết nối với Worker qua Cloudflare Dashboard.
 
-### Cài đặt và chạy
+Không đưa API token, encryption key, OAuth credential, account ID hoặc credential thật vào README, screenshot hay repository.
+
+## Local setup
+
+### 1. Cài dependencies
 
 ```bash
 npm install
+```
+
+### 2. Tạo encryption key cho local
+
+Nếu clone mới và chưa có `.env`, chạy:
+
+```bash
+npx emdash secrets generate --write .env
+```
+
+Lệnh tạo biến `EMDASH_ENCRYPTION_KEY` đúng định dạng. `.env` và `.dev.vars` đã được Git ignore; không commit hoặc chụp màn hình giá trị của key.
+
+### 3. Chạy development server
+
+```bash
 npm run dev
 ```
 
-Địa chỉ mặc định:
-
 - Website: `http://localhost:4321`
-- EmDash Admin: `http://localhost:4321/_emdash/admin`
+- Admin: `http://localhost:4321/_emdash/admin`
 
-`npm run dev` sử dụng D1/R2 local do Cloudflare runtime mô phỏng. Dữ liệu local nằm trong `.wrangler/state/` và không thay đổi D1/R2 production.
+Development dùng D1/R2 giả lập trong `.wrangler/state/`, tách biệt với dữ liệu production. Ở database mới, request đầu tiên chạy migration và có thể áp dụng `seed/seed.json` nếu setup chưa hoàn tất.
 
-File `.env` chứa `EMDASH_ENCRYPTION_KEY` cho local development. Không commit hoặc công khai giá trị này.
-
-## 8. Seed và schema
-
-Schema và dữ liệu mẫu được khai báo tại `seed/seed.json`, được chọn bởi `package.json#emdash.seed`.
-
-Seed chỉ tự áp dụng khi database còn trống và setup chưa hoàn tất. Sửa seed rồi restart/deploy không ghi đè database đã setup.
-
-Để kiểm tra seed mà không thay đổi database:
+### 4. Kiểm tra type và build
 
 ```bash
-npx emdash seed seed/seed.json --validate
+npm run typecheck
+npm run build
 ```
 
-Sau khi dev server chạy, regenerate types bằng:
+Khi schema trong Admin thay đổi, để dev server đang chạy rồi cập nhật type:
 
 ```bash
 npx emdash types
 ```
 
-## 9. Build và deploy
+File `emdash-env.d.ts` là type được sinh từ schema EmDash; không chỉnh interface collection bằng tay.
+
+## EmDash Admin
+
+Admin nằm tại `/_emdash/admin`. Lần setup đầu tiên tạo tài khoản Admin và passkey. Passkey là cơ chế xác thực mặc định của EmDash trong project này; Cloudflare Access hiện chưa được cấu hình.
+
+Admin có thể:
+
+- Tạo, sửa, publish/unpublish và xóa Product hoặc Service.
+- Quản lý Hero/CTA, page intro và thông tin liên hệ.
+- Upload media và cập nhật alt text.
+- Quản lý menu `primary`; layout cũng đọc menu `footer` nếu menu này tồn tại.
+- Sửa SEO panel cho content thuộc collection `pages`.
+
+Public site chỉ query entry có trạng thái `published` đối với danh sách Product và Service. Thay đổi trong Admin được lưu vào database, không sửa source Astro.
+
+## Content Model
+
+Schema và dữ liệu mẫu nằm tại `seed/seed.json`. Seed được đăng ký qua `package.json#emdash.seed`.
+
+### Site Settings
+
+| Setting | Mục đích |
+| --- | --- |
+| `title` | Tên website |
+| `tagline` | Tagline và metadata fallback |
+| `timezone` | Múi giờ của CMS |
+| `dateFormat` | Định dạng ngày |
+| `logo`, `favicon` | Có thể cấu hình bổ sung trong Admin |
+
+### Collections
+
+| Collection | Entry chính | Fields |
+| --- | --- | --- |
+| `hero_ctas` | `homepage` | `title`, `badge`, `description`, `cta_buttons`, `image`, `stats` |
+| `products` | Nhiều entry | `title`, `description`, `price`, `image`, `sort_order` |
+| `services` | Nhiều entry | `title`, `description`, `image`, `features`, `sort_order` |
+| `pages` | `home`, `products`, `services`, `contact` | `title`, `badge_template`, `description` |
+| `contact_info` | `main` | `title`, `badge`, `description`, `address`, `hotline`, `email`, `working_hours` |
+
+`pages` hỗ trợ drafts, revisions, preview và SEO. Các collection còn lại hỗ trợ drafts và revisions.
+
+### Taxonomy và menu
+
+- Taxonomy `product_category` gắn với `products`.
+- Menu `primary` quản lý navigation chính.
+- `Base.astro` có thể đọc menu `footer`; menu này chưa được khai báo trong seed hiện tại và cần tạo trong Admin hoặc bổ sung vào seed.
+
+### Media
+
+Image field là object media, không phải URL string. Frontend render ảnh CMS bằng:
+
+```astro
+<Image image={entry.data.image} />
+```
+
+Alt text được quản lý cùng media trong EmDash. Seed hiện có alt cho toàn bộ ảnh mẫu.
+
+## D1/R2 bindings
+
+Bindings nằm trong `wrangler.jsonc` và phải khớp với `astro.config.mjs`:
+
+| Binding | Cloudflare resource | Resource name |
+| --- | --- | --- |
+| `DB` | D1 database | `lumicasa` |
+| `MEDIA` | R2 bucket | `lumicasa` |
+
+EmDash được cấu hình như sau:
+
+```js
+emdash({
+  database: d1({ binding: "DB", session: "auto", coalesce: true }),
+  storage: r2({ binding: "MEDIA" }),
+})
+```
+
+D1 lưu schema, content, menu, settings và auth records. R2 lưu file media; D1 chỉ giữ metadata/reference của media. Tên binding và resource identifier không phải mật khẩu, nhưng credential dùng để truy cập Cloudflare vẫn phải nằm ngoài repository.
+
+## Data flow
+
+```text
+Admin chỉnh sửa và publish content
+              │
+              ├── Structured content, menu, settings ──> D1
+              └── Media binary ────────────────────────> R2
+                                                         │
+Browser request ──> Cloudflare Worker/Astro route        │
+                         │                                │
+                         ├── getEmDashEntry/Collection ───┘
+                         ├── Base.astro + components
+                         └── SSR HTML trả về browser
+```
+
+Ví dụ trang Products:
+
+1. Admin publish một Product và upload ảnh.
+2. EmDash ghi dữ liệu Product vào D1, file ảnh vào R2.
+3. `src/pages/products.astro` gọi `getEmDashCollection("products")` với `status: "published"`.
+4. Route truyền từng entry vào `ProductCard.astro`.
+5. `ProductCard` render nội dung và `<Image image={product.data.image} />`.
+
+Site Settings và menu được query trong `Base.astro`. Query có cache hint được đăng ký với Astro cache khi cache được bật.
+
+## Build và deploy qua Cloudflare Dashboard
+
+### Kiểm tra trước deploy
 
 ```bash
 npm run typecheck
 npm run build
-npm run deploy
 ```
 
-`npm run deploy` build Astro và deploy Worker qua Wrangler. Lệnh này không copy database local lên D1 production. Ở database production mới, EmDash chạy core migrations và áp dụng seed trong lần setup đầu tiên.
+### Kết nối Git repository
 
-Production URL: **Chưa cập nhật**.
+Việc deploy production được thực hiện trên Cloudflare Dashboard, không đăng nhập hoặc chạy Wrangler CLI thủ công trên máy local:
 
-Không commit API token, account credential, `.env`, `.dev.vars` hoặc encryption key.
+1. Mở **Cloudflare Dashboard → Workers & Pages**.
+2. Chọn Worker hiện có, sau đó mở **Settings → Builds**.
+3. Chọn **Connect** và kết nối GitHub repository của project.
+4. Chọn production branch `main`.
+5. Root directory để `/` vì project nằm tại repository root.
+6. Đảm bảo tên Worker trên Dashboard khớp với `name` trong `wrangler.jsonc`.
 
-## 10. Data flow cần demo
+Build settings:
+
+| Setting | Giá trị |
+| --- | --- |
+| Production branch | `main` |
+| Root directory | `/` |
+| Build command | `npm run build` |
+| Deploy command | `npx wrangler deploy` |
+
+Deploy command trên được **Cloudflare Workers Builds tự chạy trong hệ thống build**, không phải lệnh người phát triển chạy trên máy local. Cloudflare quản lý build token của Git integration; token không được ghi vào repository.
+
+### Cấu hình D1/R2 bindings trên Dashboard
+
+Trong Worker, mở **Settings → Bindings** và xác nhận:
+
+| Binding type | Variable name | Resource |
+| --- | --- | --- |
+| D1 database | `DB` | D1 database `lumicasa` |
+| R2 bucket | `MEDIA` | R2 bucket `lumicasa` |
+
+Tên binding phải khớp `astro.config.mjs` và `wrangler.jsonc`. Không dùng D1/R2 preview chung với production nếu sau này bật preview deployments.
+
+### Cấu hình production secret trên Dashboard
+
+1. Mở Worker → **Settings → Variables and Secrets**.
+2. Chọn **Add**.
+3. Chọn type **Secret**.
+4. Variable name: `EMDASH_ENCRYPTION_KEY`.
+5. Nhập giá trị key vào Dashboard và chọn **Deploy** để áp dụng.
+
+Không dùng type plaintext variable cho encryption key. Sau khi lưu, Dashboard không hiển thị lại giá trị secret; cần backup key trong secret manager riêng.
+
+### Deploy Worker
+
+Commit và push thay đổi lên branch `main`:
+
+```bash
+git push origin main
+```
+
+Cloudflare tự động build và deploy. Theo dõi kết quả tại **Worker → Deployments → Build history**. Dữ liệu trong `.wrangler/state/` không được upload lên production.
+
+Sau deploy:
+
+1. Mở public URL trong cửa sổ ẩn danh.
+2. Hoàn tất setup Admin bằng passkey nếu đây là database mới.
+3. Xác nhận D1 có content thật và R2 có media thật.
+4. Kiểm tra `/`, `/products`, `/services`, `/contact` và `/_emdash/admin`.
+5. Upload một media, publish một entry thử nghiệm rồi kiểm tra public site.
+6. Xóa hoặc unpublish nội dung thử nghiệm trước khi bàn giao.
+
+## Production URL
+
+**Trạng thái: chưa xác nhận production-ready.**
+
+- Public URL: `Chưa cập nhật sau khi xác minh deployment`
+- Admin URL: `<production-url>/_emdash/admin`
+
+Không điền URL suy đoán. Chỉ cập nhật mục này sau khi URL mở được ở cửa sổ ẩn danh, bindings đúng, D1/R2 có dữ liệu thật và Admin yêu cầu xác thực.
+
+## Known limitations
+
+- Production URL và quy trình production smoke test chưa được xác nhận trong README này.
+- Worker production cần được cấp `EMDASH_ENCRYPTION_KEY`; secret không nằm trong repository.
+- Menu `footer` đang được layout query nhưng chưa có trong `seed/seed.json`; môi trường mới sẽ cần tạo menu này hoặc bổ sung seed.
+- Form Contact chỉ validate, redirect và hiển thị feedback; chưa gửi email và chưa lưu lead.
+- Chưa có trang chi tiết riêng cho Product hoặc Service.
+- Layout các route chính được cố định trong Astro; Admin quản lý nội dung nhưng không phải page builder.
+- Route `[slug].astro` render mọi entry `pages` đã publish. Cần xóa/unpublish page placeholder như `test` trước production.
+- Canonical hiện chỉ được xử lý rõ ràng cho page động qua `getSeoMeta()`; các route cố định cần được rà soát SEO lần cuối trước production.
+- Nếu Hero hoặc page intro bắt buộc bị unpublish, route vẫn có thể render nhưng cấu trúc heading sẽ không đầy đủ; cần giữ các entry hệ thống này ở trạng thái published.
+- Sandboxed plugins/Worker Loader chưa bật vì không nằm trong phạm vi hiện tại và có thể yêu cầu Workers paid plan.
+
+## Security notes
+
+- Không commit `.env`, `.dev.vars`, Cloudflare token, OAuth secret hoặc plugin API key.
+- Không đưa credential thật vào README, tài liệu AI usage, video hoặc screenshot.
+- Không log form data, auth token hoặc secret ra console.
+- Admin production hiện dự kiến dùng passkey mặc định của EmDash. Nếu chuyển sang Cloudflare Access, phải bảo vệ toàn bộ `/_emdash/*`, không chỉ `/_emdash/admin/*`.
+- Backup `EMDASH_ENCRYPTION_KEY` trong secret manager riêng; D1 backup không chứa key này.
+
+## Project structure
 
 ```text
-Admin tạo/sửa Product
-        ↓
-EmDash ghi structured data vào D1
-        ↓
-Ảnh upload qua Media được lưu vào R2
-        ↓
-Route Astro gọi getEmDashCollection("products")
-        ↓
-Frontend render card và <Image image={product.data.image} />
-        ↓
-Create/Update/Publish/Delete phản ánh mà không sửa component
+seed/seed.json             Content model và dữ liệu mẫu
+astro.config.mjs           Astro + EmDash + D1/R2 integration
+wrangler.jsonc             Worker, D1/R2 bindings và cron
+emdash-env.d.ts            Generated collection types
+src/worker.ts              Cloudflare Worker entry point
+src/layouts/Base.astro     Shared layout, menus, metadata và EmDash wiring
+src/pages/                 Server-rendered routes
+src/components/            UI components
+src/css/                   Global và page-specific styles
+docs/design.md             Ghi chú thiết kế/content model
+docs/ai-usage.md           Phạm vi hỗ trợ bởi AI
 ```
 
-Quy trình tương tự áp dụng cho Service, Page intro, Hero/CTA, Contact Info và Menu.
+## Commands
 
-## 11. Checklist nghiệm thu
+| Command | Mục đích |
+| --- | --- |
+| `npm run dev` | Chạy local site và Admin |
+| `npx emdash types` | Regenerate `emdash-env.d.ts` từ site đang chạy |
+| `npm run typecheck` | Kiểm tra Astro/TypeScript |
+| `npm run build` | Build Cloudflare SSR output |
+| `git push origin main` | Kích hoạt Cloudflare Workers Builds sau khi commit |
 
-- [ ] Hoàn thiện `seed/seed.json` theo content model trên.
-- [ ] Regenerate `emdash-env.d.ts`.
-- [ ] Refactor đủ bốn route chính.
-- [ ] Header dùng Site Settings và EmDash Menu.
-- [ ] Product/Service query từ EmDash, không dùng mảng hard-code.
-- [ ] Product Category được quản lý bằng taxonomy và hiển thị trên card.
-- [ ] Product/Service media được upload qua EmDash và đọc từ R2 ở production.
-- [ ] CRUD Product/Service hoạt động và không crash khi dữ liệu rỗng/xóa.
-- [ ] Draft/unpublished item không xuất hiện ở public site.
-- [ ] Form Contact validate và có feedback.
-- [ ] Responsive desktop/mobile.
-- [ ] Title, meta description, heading và alt text hợp lý.
-- [ ] `npm run typecheck` và `npm run build` thành công.
-- [ ] Deploy Cloudflare Workers và cập nhật production URL.
-- [ ] Bổ sung `docs/ai-usage.md` và video demo 5–7 phút.
+## Tài liệu
 
-## 12. Giới hạn đã chủ động chọn
-
-- Không triển khai page-builder `blocks`; layout bốn route được cố định trong Astro để giữ scope rõ ràng.
-- Không tạo taxonomy Tag vì chưa có chức năng sử dụng.
-- Không lưu lead hoặc gửi email từ Contact form trong core scope.
-- CTA phụ cố định trong từng layout có thể nằm trong component; Hero/CTA chính được quản lý qua `hero_ctas`.
-- Sandboxed plugins bị tắt vì bài không yêu cầu tính năng trả phí.
-
-## 13. Tài liệu tham khảo
-
-- [EmDash Getting Started](https://docs.emdashcms.com/getting-started/)
-- [EmDash Cloudflare Deployment](https://docs.emdashcms.com/deployment/cloudflare/)
-- [EmDash Seed Files](https://docs.emdashcms.com/themes/seed-files/)
+- [EmDash documentation](https://docs.emdashcms.com/)
+- [EmDash authentication](https://docs.emdashcms.com/guides/authentication/)
+- [EmDash Cloudflare deployment](https://docs.emdashcms.com/deployment/cloudflare/)
+- [Cloudflare Workers Builds](https://developers.cloudflare.com/workers/ci-cd/builds/)
+- [Cloudflare Worker secrets](https://developers.cloudflare.com/workers/configuration/secrets/)
+- [Cloudflare Workers documentation](https://developers.cloudflare.com/workers/)

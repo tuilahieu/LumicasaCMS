@@ -99,3 +99,12 @@ src
 - index.css ( import )
 - [slug]/index.css
 - utils
+
+=> chốt lại thiết kế
+5 collection:
+
+- hero_cta: title, description, image, badge, cta_buttons, stats
+- product: title, description, image, price, sort_order
+- service: title, description, image, features, sort_order
+- page: title, badge, description
+- contact_info: title, badge, description, address, hotline, email, working_hour

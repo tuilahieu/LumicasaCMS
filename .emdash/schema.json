@@ -1,0 +1,302 @@
+{
+  "collections": [
+    {
+      "slug": "contact_info",
+      "label": "Contact Information",
+      "labelSingular": "Contact Information",
+      "supports": [
+        "drafts",
+        "revisions"
+      ],
+      "hidden": false,
+      "fields": [
+        {
+          "slug": "title",
+          "label": "Title",
+          "type": "string",
+          "required": true,
+          "unique": false
+        },
+        {
+          "slug": "badge",
+          "label": "Badge",
+          "type": "string",
+          "required": false,
+          "unique": false
+        },
+        {
+          "slug": "description",
+          "label": "Description",
+          "type": "text",
+          "required": false,
+          "unique": false
+        },
+        {
+          "slug": "address",
+          "label": "Address",
+          "type": "text",
+          "required": true,
+          "unique": false
+        },
+        {
+          "slug": "hotline",
+          "label": "Hotline",
+          "type": "string",
+          "required": true,
+          "unique": false
+        },
+        {
+          "slug": "email",
+          "label": "Email",
+          "type": "string",
+          "required": true,
+          "unique": false
+        },
+        {
+          "slug": "working_hours",
+          "label": "Working Hours",
+          "type": "string",
+          "required": true,
+          "unique": false
+        }
+      ]
+    },
+    {
+      "slug": "hero_ctas",
+      "label": "Hero & CTA",
+      "labelSingular": "Hero & CTA",
+      "supports": [
+        "drafts",
+        "revisions"
+      ],
+      "hidden": false,
+      "fields": [
+        {
+          "slug": "title",
+          "label": "Title",
+          "type": "string",
+          "required": true,
+          "unique": false
+        },
+        {
+          "slug": "badge",
+          "label": "Badge",
+          "type": "string",
+          "required": false,
+          "unique": false
+        },
+        {
+          "slug": "description",
+          "label": "Description",
+          "type": "text",
+          "required": false,
+          "unique": false
+        },
+        {
+          "slug": "cta_buttons",
+          "label": "CTA Buttons",
+          "type": "repeater",
+          "required": false,
+          "unique": false,
+          "validation": {
+            "subFields": [
+              {
+                "slug": "label_template",
+                "label": "Label Template",
+                "type": "string",
+                "required": true
+              },
+              {
+                "slug": "url",
+                "label": "URL",
+                "type": "url",
+                "required": true
+              },
+              {
+                "slug": "variant",
+                "label": "Variant",
+                "type": "select",
+                "validation": {
+                  "options": [
+                    "primary",
+                    "secondary"
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "slug": "image",
+          "label": "Image",
+          "type": "image",
+          "required": true,
+          "unique": false
+        },
+        {
+          "slug": "stats",
+          "label": "Stats",
+          "type": "repeater",
+          "required": false,
+          "unique": false,
+          "validation": {
+            "subFields": [
+              {
+                "slug": "value_template",
+                "label": "Value Template",
+                "type": "string",
+                "required": true
+              },
+              {
+                "slug": "label",
+                "label": "Label",
+                "type": "string",
+                "required": true
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "slug": "pages",
+      "label": "Pages",
+      "labelSingular": "Page",
+      "supports": [
+        "drafts",
+        "revisions",
+        "preview",
+        "seo"
+      ],
+      "hidden": false,
+      "fields": [
+        {
+          "slug": "title",
+          "label": "Title",
+          "type": "string",
+          "required": true,
+          "unique": false
+        },
+        {
+          "slug": "badge_template",
+          "label": "Badge Template",
+          "type": "string",
+          "required": false,
+          "unique": false
+        },
+        {
+          "slug": "description",
+          "label": "Description",
+          "type": "text",
+          "required": true,
+          "unique": false
+        }
+      ]
+    },
+    {
+      "slug": "products",
+      "label": "Products",
+      "labelSingular": "Product",
+      "supports": [
+        "drafts",
+        "revisions"
+      ],
+      "hidden": false,
+      "fields": [
+        {
+          "slug": "title",
+          "label": "Title",
+          "type": "string",
+          "required": true,
+          "unique": false
+        },
+        {
+          "slug": "description",
+          "label": "Description",
+          "type": "text",
+          "required": true,
+          "unique": false
+        },
+        {
+          "slug": "price",
+          "label": "Price (VND)",
+          "type": "integer",
+          "required": true,
+          "unique": false
+        },
+        {
+          "slug": "image",
+          "label": "Image",
+          "type": "image",
+          "required": true,
+          "unique": false
+        },
+        {
+          "slug": "sort_order",
+          "label": "Sort Order",
+          "type": "integer",
+          "required": true,
+          "unique": false
+        }
+      ]
+    },
+    {
+      "slug": "services",
+      "label": "Services",
+      "labelSingular": "Service",
+      "supports": [
+        "drafts",
+        "revisions"
+      ],
+      "hidden": false,
+      "fields": [
+        {
+          "slug": "title",
+          "label": "Title",
+          "type": "string",
+          "required": true,
+          "unique": false
+        },
+        {
+          "slug": "description",
+          "label": "Description",
+          "type": "text",
+          "required": true,
+          "unique": false
+        },
+        {
+          "slug": "image",
+          "label": "Image",
+          "type": "image",
+          "required": true,
+          "unique": false
+        },
+        {
+          "slug": "features",
+          "label": "Features",
+          "type": "repeater",
+          "required": false,
+          "unique": false,
+          "validation": {
+            "subFields": [
+              {
+                "slug": "text",
+                "label": "Text",
+                "type": "string",
+                "required": true
+              }
+            ]
+          }
+        },
+        {
+          "slug": "sort_order",
+          "label": "Sort Order",
+          "type": "integer",
+          "required": true,
+          "unique": false
+        }
+      ]
+    }
+  ],
+  "version": "de46db5b766c2eae"
+}
