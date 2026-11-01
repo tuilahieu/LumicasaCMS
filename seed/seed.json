@@ -57,9 +57,7 @@
                 "slug": "variant",
                 "label": "Variant",
                 "type": "select",
-                "validation": {
-                  "options": ["primary", "secondary"]
-                }
+                "options": ["primary", "secondary"]
               }
             ]
           }
